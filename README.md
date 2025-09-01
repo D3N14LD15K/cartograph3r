@@ -106,8 +106,7 @@ MIT — do what you want, but don’t be a d^ck.
 
 The bug bounty community — for making tooling cool again
 
-
-```
+----
 You’re not just crawling — you’re reverse-engineering the frontend.
 That power comes with responsibility. 
 
