@@ -290,7 +290,7 @@ PY
       )"
     fi
 
-    # 3. Resolve and record .map URL
+# 3. Resolve and record .map URL
     if [ -n "$map_url" ]; then
       abs_url="$(resolve_url "$url" "$map_url")"
       if [ -n "$abs_url" ]; then
@@ -304,6 +304,9 @@ PY
         "$candidate" "$host" "$(basename "$js_path").map" "$js_path" "Heuristic" \
         >> "$MAPLIST_TSV"
     fi
+
+  done < "$JSMAP_TSV"  # ✅ CLOSE the while loop here
+fi  # ✅ CLOSE the outer if [ ! -s ] ... fi
 
 # Step 4: Download .map files
 MAP_COUNT=$(wc -l < "$MAPLIST_TSV" 2>/dev/null || echo 0)
