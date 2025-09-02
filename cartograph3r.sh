@@ -113,6 +113,22 @@ apply_headers() {
   printf '%s ' "${extra_headers[@]}"
 }
 
+resolve_url() {
+  local base="$1"
+  local rel="$2"
+  printf '%s\n%s' "$base" "$rel" | python3 - 2>/dev/null << 'PY_END'
+import sys
+from urllib.parse import urljoin
+
+try:
+    base = sys.stdin.readline().strip()
+    rel = sys.stdin.readline().strip()
+    print(urljoin(base, rel))
+except Exception:
+    pass
+PY_END
+}
+
 echo "[*] Output directory: $OUTDIR"
 echo "[*] Target file: $HOSTS_FILE"
 if [[ "$URLS_READY" == true ]]; then
@@ -163,7 +179,13 @@ PY
   "$HOME"/go/bin/httpx -silent -no-color -fhr -sc < "$OUTDIR/urls/js_urls_sanitized.txt" | awk '$2=="[200]" || $2==200 {print $1}' > "$OUTDIR/urls/js_urls_alive.txt"
 else
   # Use provided file as live JS URLs
-  cp "$HOSTS_FILE" "$OUTDIR/urls/js_urls_alive.txt"
+  
+  if [[ "$HOSTS_FILE" != "$OUTDIR/urls/js_urls_alive.txt" ]]; then
+  	cp "$HOSTS_FILE" "$OUTDIR/urls/js_urls_alive.txt"
+  else
+        echo "[*] Input is already in output dir — skipping copy."
+  fi
+
   echo "[*] Using provided URLs as live JS list."
 fi
 
@@ -235,7 +257,7 @@ else
     js_path="$OUTDIR/js/$host/$fn"
     [ -s "$js_path" ] || continue
 
-    # 1. Inline comment
+# 1. Inline comment
     map_url="$(
       python3 - "$js_path" <<'PY'
 import sys, re, pathlib
@@ -268,23 +290,20 @@ PY
       )"
     fi
 
-    # 3. Heuristic fallback
+    # 3. Resolve and record .map URL
     if [ -n "$map_url" ]; then
-      abs_url="$(
-    printf '%s\n%s' "$url" "$map_url" | python3 - << 'EOF'
-import sys, urllib.parse
-base = sys.stdin.readline().strip()
-rel = sys.stdin.readline().strip()
-print(urllib.parse.urljoin(base, rel))
-EOF
-  )"
-      printf '%s\t%s\t%s\t%s\t%s\n' "$abs_url" "$host" "$(basename "$js_path").map" "$js_path" "DeclRef/Hdr" >> "$MAPLIST_TSV"
+      abs_url="$(resolve_url "$url" "$map_url")"
+      if [ -n "$abs_url" ]; then
+        printf '%s\t%s\t%s\t%s\t%s\n' \
+          "$abs_url" "$host" "$(basename "$js_path").map" "$js_path" "DeclRef/Hdr" \
+          >> "$MAPLIST_TSV"
+      fi
     elif [[ "$url" =~ \.js(\?.*)?$ ]]; then
       candidate="${url%%\?*}.map"
-      printf '%s\t%s\t%s\t%s\t%s\n' "$candidate" "$host" "$(basename "$js_path").map" "$js_path" "Heuristic" >> "$MAPLIST_TSV"
+      printf '%s\t%s\t%s\t%s\t%s\n' \
+        "$candidate" "$host" "$(basename "$js_path").map" "$js_path" "Heuristic" \
+        >> "$MAPLIST_TSV"
     fi
-  done < "$JSMAP_TSV"
-fi
 
 # Step 4: Download .map files
 MAP_COUNT=$(wc -l < "$MAPLIST_TSV" 2>/dev/null || echo 0)
