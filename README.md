@@ -81,7 +81,7 @@ Example
 ```
 
 Flags
-```bash
+```
 -t, --target (Required)
 Input file containing either base domains or live JS URLs (if used with -u)
 
@@ -91,12 +91,12 @@ Output directory (default: jsmap-out)
 -u, --urls-ready (Optional)
 Skip crawling — assume input file contains direct .js URLs to download
 
-
 -r, --rate-limit (Optional)
 Limit requests per second (e.g., -r 5 -> 5 req/sec)
 
 -H, --header (Optional)
-Add custom headers to HTTP requests (can be used multiple times) -H 'X-Bugcrowd-Username: D3N14LD15K'
+Add custom headers to HTTP requests (can be used multiple times) 
+-H 'X-Bugcrowd-Username: D3N14LD15K'
 
 -h, --help
 Show help menu and usage examples
