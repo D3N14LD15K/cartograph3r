@@ -284,7 +284,7 @@ PY
         curl -fsSL --http2 -L -D - -o /dev/null -H 'Accept: */*' -H 'Accept-Encoding: gzip, deflate, br' -A 'Mozilla/5.0' "$curl_hdr_url" 2>/dev/null \
           | tr -d '\r' \
           | awk -F': *' 'tolower($1)=="sourcemap"||tolower($1)=="x-sourcemap"{print $2; exit}'
-      )"
+      ) || true"
     fi
 
     # 3. Resolve and save
