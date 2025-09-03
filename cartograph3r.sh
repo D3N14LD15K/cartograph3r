@@ -294,7 +294,7 @@ PY
 
     # 3. Resolve and save
     if [ -n "$map_url" ]; then
-      abs_url="$($HOME/tools/cartograph3r/bin/resolve_url.py "$url" "$map_url")"
+      abs_url=$(printf '%s\n%s' "$url" "$map_url" | bin/resolve_url.py)
       if [[ -n "$abs_url" && "$abs_url" =~ ^https?:// ]]; then
         printf '%s\t%s\t%s\t%s\t%s\n' \
           "$abs_url" "$host" "$(basename "$js_path").map" "$js_path" "DeclRef/Hdr" \

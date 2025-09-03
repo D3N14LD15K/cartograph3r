@@ -2,14 +2,16 @@
 import sys
 from urllib.parse import urljoin
 
-if len(sys.argv) != 3:
-    print("", end="")
-    exit(0)
-
-base = sys.argv[1].strip()
-rel = sys.argv[2].strip()
-
 try:
+    # Read base + rel from stdin (not command line)
+    data = sys.stdin.read().strip().splitlines()
+    if len(data) < 2:
+        print("", end="")
+        exit(0)
+    base = data[0].strip()
+    rel = data[1].strip()
+
+    # Resolve
     result = urljoin(base, rel)
     print(result)
 except Exception:
