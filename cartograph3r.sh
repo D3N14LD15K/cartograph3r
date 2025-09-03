@@ -280,11 +280,16 @@ path = p.path.replace('[','%5B').replace(']','%5D').replace(' ','%20')
 print(urllib.parse.urlunsplit((p.scheme,p.netloc,path,p.query,p.fragment)))
 PY
       )"
-      map_url="$(
-        curl -fsSL --http2 -L -D - -o /dev/null -H 'Accept: */*' -H 'Accept-Encoding: gzip, deflate, br' -A 'Mozilla/5.0' "$curl_hdr_url" 2>/dev/null \
-          | tr -d '\r' \
-          | awk -F': *' 'tolower($1)=="sourcemap"||tolower($1)=="x-sourcemap"{print $2; exit}'
-      ) || true"
+
+      map_url=$( \
+      curl -fsSL --http2 -L -D - -o /dev/null \
+       -H 'Accept: */*' \
+       -H 'Accept-Encoding: gzip, deflate, br' \
+       -A 'Mozilla/5.0' "$curl_hdr_url" 2>/dev/null \
+      | tr -d '\r' \
+      | awk -F': *' 'tolower($1)=="sourcemap" || tolower($1)=="x-sourcemap" {print $2; exit}' \
+      ) || map_url=""
+
     fi
 
     # 3. Resolve and save
