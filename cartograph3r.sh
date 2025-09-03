@@ -172,13 +172,17 @@ PY
   "$HOME"/go/bin/httpx -silent -no-color -fhr -sc < "$OUTDIR/urls/js_urls_sanitized.txt" | awk '$2=="[200]" || $2==200 {print $1}' > "$OUTDIR/urls/js_urls_alive.txt"
 else
   # Use provided file as live JS URLs
-  if [[ "$HOSTS_FILE" != "$OUTDIR/urls/js_urls_alive.txt" ]]; then
-    cp "$HOSTS_FILE" "$OUTDIR/urls/js_urls_alive.txt"
-    echo "[*] Copied JS URLs list."
-  else
-    echo "[*] Input is already in output dir — skipping copy."
-  fi
-  echo "[*] Using provided URLs as live JS list."
+  normalized_host_file="$(realpath "$HOSTS_FILE" 2>/dev/null || echo "$HOSTS_FILE" | sed 's|//*|/|g')"
+  normalized_dest="$(realpath "$OUTDIR/urls/js_urls_alive.txt" 2>/dev/null || echo "$OUTDIR/urls/js_urls_alive.txt" | sed 's|//*|/|g')"
+
+if [[ "$normalized_host_file" == "$normalized_dest" ]]; then
+  echo "[*] Input is already in output dir — skipping copy."
+else
+  cp "$HOSTS_FILE" "$OUTDIR/urls/js_urls_alive.txt"
+  echo "[*] Copied JS URLs list."
+fi
+
+echo "[*] Using provided URLs as live JS list."
 fi
 
 # Step 2: Download JS files
