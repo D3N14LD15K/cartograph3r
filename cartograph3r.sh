@@ -13,6 +13,8 @@ HOSTS_FILE=""
 HELP=false
 RATE_LIMIT=0
 HEADERS=()
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
+RESOLVER="$SCRIPT_DIR/bin/resolve_url.py"
 
 # Function: apply_headers
 apply_headers() {
@@ -298,7 +300,7 @@ PY
 
     # 3. Resolve and save
     if [ -n "$map_url" ]; then
-      abs_url=$(printf '%s\n%s' "$url" "$map_url" | bin/resolve_url.py)
+      abs_url=$(printf '%s\n%s' "$url" "$map_url" | "$RESOLVER" )
       if [[ -n "$abs_url" && "$abs_url" =~ ^https?:// ]]; then
         printf '%s\t%s\t%s\t%s\t%s\n' \
           "$abs_url" "$host" "$(basename "$js_path").map" "$js_path" "DeclRef/Hdr" \
